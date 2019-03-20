@@ -34,6 +34,7 @@ class UserManager(BaseUserManager):
 
         return user
 
+
 class User(AbstractBaseUser,PermissionsMixin):
 
     username =  models.CharField(db_index=True, max_length=255, unique=True)
@@ -45,10 +46,12 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    updated_at = models.DateTimeField(auto_now=False)
+    updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD= 'email'
     REQUIRED_FIELDS = ['username']
+
+    objects = UserManager()
 
     def __str__(self):
         """
@@ -70,7 +73,7 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     def get_shortname(self):
 
-        return username
+        return self.username
 
     def _generate_jwt_token(self):
         """
