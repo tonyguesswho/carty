@@ -1,6 +1,7 @@
 import jwt
 
 from datetime import datetime, timedelta
+from car_project.apps.core.models import TimeStampedModel
 
 from django.conf import settings
 from django.contrib.auth.models import (
@@ -35,7 +36,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser,PermissionsMixin):
+class User(AbstractBaseUser,PermissionsMixin, TimeStampedModel):
 
     username =  models.CharField(db_index=True, max_length=255, unique=True)
 
@@ -43,10 +44,6 @@ class User(AbstractBaseUser,PermissionsMixin):
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default= False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    updated_at = models.DateTimeField(auto_now=True)
 
     USERNAME_FIELD= 'email'
     REQUIRED_FIELDS = ['username']

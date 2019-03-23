@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 
 
 from .models import  User
+from car_project.apps.profiles.serializers import ProfileSerializer
 
 class RegistrationSerializer(serializers.ModelSerializer):
     """Serializers registration requests and creates a new user."""
@@ -12,7 +13,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         min_length=8,
         write_only = True
     )
-
+    
     token = serializers.CharField(read_only=True)
 
     class Meta:
@@ -61,16 +62,18 @@ class LoginSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Handles serialization and deserialization of User objects."""
-
+    profile = ProfileSerializer(write_only=True)
     password = serializers.CharField(
         max_length=128,
         min_length=8,
         write_only=True
     )
+    bio = serializers.CharField(source='profile.bio', read_only=True)
+    image = serializers.CharField(source='profile.image', read_only=True)
 
     class Meta:
         model = User
-        fields = ('email', 'username', 'password', 'token',)
+        fields = ('email', 'username', 'password', 'token','profile','bio','username','image')
         read_only_fields = ('token',)
 
 
@@ -80,6 +83,7 @@ class UserSerializer(serializers.ModelSerializer):
         # Django provides a function that handles hashing and
         # salting passwords.
         password = validated_data.pop('password', None)
+        profile_data = validated_data.pop('profile', {})
 
         for (key, value) in validated_data.items():
 
@@ -90,5 +94,7 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
 
         instance.save()
-
+        for (key, value) in profile_data.items():
+            setattr(instance.profile, key, value)
+            instance.profile.save()
         return instance
